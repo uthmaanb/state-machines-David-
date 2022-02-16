@@ -38,6 +38,8 @@ const stateMachine = createMachine({
 });
 
 class PaymentForm extends React.Component {
+	// idle, loading, success, error
+
 	service = interpret(stateMachine).onTransition((current) => {
 		console.log(current);
 	});
@@ -45,6 +47,15 @@ class PaymentForm extends React.Component {
 	componentDidMount() {
 		this.service.start();
 	}
+
+	componentWillUnmount() {
+		this.service.stop();
+	}
+
+	handleSubmit = () => {
+		console.log("Submitting");
+		this.service.send("SUBMIT");
+	};
 
 	render() {
 		return (
@@ -75,7 +86,8 @@ class PaymentForm extends React.Component {
 						<button
 							id="PayButton"
 							className="btn btn-block btn-success submit-button"
-							type="submit"
+							type="button"
+							onClick={this.handleSubmit}
 						>
 							<span className="submit-button-lock" />
 							<span className="align-middle">Pay Now</span>
