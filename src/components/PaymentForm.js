@@ -15,14 +15,10 @@ const stateMachine = createMachine({
 				SUBMIT: "loading",
 			},
 		},
-
 		loading: {
 			invoke: {
 				id: "doPayment",
-				src: (context, event) => {
-					console.log(context);
-					fakePayment(context.name, context.card);
-				},
+				src: (context, event) => fakePayment(),
 				onDone: {
 					target: "success",
 				},
@@ -31,13 +27,11 @@ const stateMachine = createMachine({
 				},
 			},
 		},
-
 		error: {
 			on: {
 				SUBMIT: "loading",
 			},
 		},
-
 		success: {
 			type: "final",
 		},
@@ -61,6 +55,7 @@ class PaymentForm extends React.Component {
 
 	// idle, loading, success, error
 	service = interpret(stateMachine).onTransition((current) => {
+		console.log(current);
 		this.setState({ current });
 	});
 
@@ -86,44 +81,32 @@ class PaymentForm extends React.Component {
 
 	render() {
 		const { current } = this.state;
-
 		return (
-			<div className="form-container">
-				<div className="form-header">
-					<h2>State Machine Payment Form</h2>
-				</div>
-
-				<div className="form-body">
+			<div className="container">
+				<h2 className="header">State Machine Payment Form</h2>
+				<div className="form__body">
 					<form>
-						<div className="form-group">
+						<div>
 							<label htmlFor="NameOnCard">Name on card</label>
 							<input
 								onChange={this.handleChange}
 								value={current.context.name}
 								id="NameOnCard"
-								name="name"
-								className="form-control"
 								type="text"
-								// maxLength="255"
+								name="name"
 							/>
 						</div>
-						<div className="form-group">
+						<div>
 							<label htmlFor="CreditCardNumber">Card number</label>
 							<input
 								onChange={this.handleChange}
 								value={current.context.card}
 								id="CreditCardNumber"
 								name="card"
-								className="null card-image form-control"
 								type="text"
 							/>
 						</div>
-						<button
-							id="PayButton"
-							className="btn btn-block btn-success submit-button"
-							type="button"
-							onClick={this.handleSubmit}
-						>
+						<button type="button" onClick={this.handleSubmit}>
 							<span className="submit-button-lock" />
 							<span className="align-middle">Pay Now</span>
 						</button>
