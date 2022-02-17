@@ -18,7 +18,11 @@ const stateMachine = createMachine({
 		loading: {
 			invoke: {
 				id: "doPayment",
-				src: (context, event) => fakePayment(),
+				// src: (context, event) => fakePayment(),
+				src: (context, event) => {
+					console.log(context);
+					fakePayment(context.name, context.card);
+				},
 				onDone: {
 					target: "success",
 				},
