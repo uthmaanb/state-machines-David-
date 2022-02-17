@@ -1,10 +1,14 @@
 import React from "react";
-import { createMachine, interpret } from "xstate";
+import { assign, createMachine, interpret } from "xstate";
 
 import fakePayment from "../utils/fakePayments";
 
 const stateMachine = createMachine({
 	initial: "idle",
+	context: {
+		name: "",
+		card: "",
+	},
 	states: {
 		idle: {
 			on: {
@@ -15,7 +19,10 @@ const stateMachine = createMachine({
 		loading: {
 			invoke: {
 				id: "doPayment",
-				src: (context, event) => fakePayment(),
+				src: (context, event) => {
+					console.log(context);
+					fakePayment(context.name, context.card);
+				},
 				onDone: {
 					target: "success",
 				},
@@ -35,13 +42,26 @@ const stateMachine = createMachine({
 			type: "final",
 		},
 	},
+
+	on: {
+		INPUT_CHANGE: {
+			actions: assign((context, event) => {
+				return {
+					[event.name]: event.value,
+				};
+			}),
+		},
+	},
 });
 
 class PaymentForm extends React.Component {
-	// idle, loading, success, error
+	state = {
+		current: stateMachine.initialState,
+	};
 
+	// idle, loading, success, error
 	service = interpret(stateMachine).onTransition((current) => {
-		console.log(current);
+		this.setState({ current });
 	});
 
 	componentDidMount() {
@@ -57,7 +77,16 @@ class PaymentForm extends React.Component {
 		this.service.send("SUBMIT");
 	};
 
+	handleChange = (e) => {
+		this.service.send("INPUT_CHANGE", {
+			name: e.target.name,
+			value: e.target.value,
+		});
+	};
+
 	render() {
+		const { current } = this.state;
+
 		return (
 			<div className="form-container">
 				<div className="form-header">
@@ -69,16 +98,22 @@ class PaymentForm extends React.Component {
 						<div className="form-group">
 							<label htmlFor="NameOnCard">Name on card</label>
 							<input
+								onChange={this.handleChange}
+								value={current.context.name}
 								id="NameOnCard"
+								name="name"
 								className="form-control"
 								type="text"
-								maxLength="255"
+								// maxLength="255"
 							/>
 						</div>
 						<div className="form-group">
 							<label htmlFor="CreditCardNumber">Card number</label>
 							<input
+								onChange={this.handleChange}
+								value={current.context.card}
 								id="CreditCardNumber"
+								name="card"
 								className="null card-image form-control"
 								type="text"
 							/>

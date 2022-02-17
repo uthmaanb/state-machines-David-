@@ -6,7 +6,7 @@ import "./styles/App.css";
 const App = () => {
 	return (
 		<div>
-			<h2>Wekcome to the state machine</h2>
+			<h2>Welcome to the state machine</h2>
 			<PaymentForm />
 		</div>
 	);
